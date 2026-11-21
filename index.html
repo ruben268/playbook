@@ -523,6 +523,18 @@
     .pl-scroll{padding:14px 18px 6px} .pl-foot{padding-left:18px; padding-right:18px} .pl-head{padding-left:18px}
   }
   @media (max-width:480px){ .pl-card,.pl-endcard{padding:20px 18px 16px} .pl-card h2,.pl-endcard h2{font-size:24px} }
+  .sw-pill{position:absolute; top:14px; left:50%; transform:translate(-50%,-6px); z-index:6; background:rgba(28,36,48,.88); color:#fff; font-size:14px; font-weight:500; padding:7px 14px; border-radius:999px; pointer-events:none; opacity:0; transition:opacity .2s, transform .2s; white-space:nowrap}
+  .sw-pill b{font-weight:700}
+  .sw-pill.on{opacity:1; transform:translate(-50%,0)}
+  #svg.sw-in-r{animation:swInR .32s cubic-bezier(.2,.8,.2,1)}
+  #svg.sw-in-l{animation:swInL .32s cubic-bezier(.2,.8,.2,1)}
+  #svg.sw-bump-l{animation:swBumpL .3s ease}
+  #svg.sw-bump-r{animation:swBumpR .3s ease}
+  @keyframes swInR{from{transform:translateX(34px); opacity:.35} to{transform:none; opacity:1}}
+  @keyframes swInL{from{transform:translateX(-34px); opacity:.35} to{transform:none; opacity:1}}
+  @keyframes swBumpL{30%{transform:translateX(-12px)} 100%{transform:none}}
+  @keyframes swBumpR{30%{transform:translateX(12px)} 100%{transform:none}}
+  @media (max-width:900px){ #modeSeg,#insMode,#toolsBtn,#newPlayBtn,#dupPlayBtn,#importBtn{display:none !important} .sidebar-foot .io-row{display:block} .sidebar-foot .io-row .btn{width:100%} }
 </style>
 </head>
 <body>
@@ -532,9 +544,10 @@
 </div>
 <div class="pl-bg" id="plWelcome" role="dialog" aria-modal="true" aria-labelledby="plWTitle">
   <div class="pl-card pl-welcome">
-    <h2 id="plWTitle">Welcome to the demo</h2>
-    <p>This is a beta. Tap a play and press play to see it step by step.</p>
+    <h2 id="plWTitle">Welcome to the Playbook</h2>
+    <p>This is a demo. Select a play to see it step by step.</p>
     <p>On your phone you see what your players see. Editing plays works best on a laptop.</p>
+    <p>If you like what you see, please join the pilot.</p>
     <button class="btn primary pl-big" id="plWGo" type="button">Try it</button>
   </div>
 </div>
@@ -553,7 +566,7 @@
           <input class="pl-extra" id="plShareApp" type="text" placeholder="Which app?" hidden><input class="pl-extra" id="plShareOther" type="text" placeholder="How else?" hidden><div class="pl-err"></div></div>
         <div class="pl-f" data-f="teams"><span class="pl-l" id="plTeamsL">How many teams does your club have?</span><div class="pl-chips" data-group="teams" data-multi="0" role="group" aria-labelledby="plTeamsL"><button type="button" class="pl-chip">1</button><button type="button" class="pl-chip">2</button><button type="button" class="pl-chip">3</button><button type="button" class="pl-chip">4 or more</button></div><div class="pl-err"></div></div>
         <div class="pl-f" data-f="want"><span class="pl-l" id="plWantL">Would you like your club's own version? <i>*</i></span><div class="pl-chips" data-group="want" data-multi="0" role="group" aria-labelledby="plWantL"><button type="button" class="pl-chip">Yes, set it up for us</button><button type="button" class="pl-chip">Maybe, keep me posted</button><button type="button" class="pl-chip">No thanks</button></div><div class="pl-err"></div></div>
-        <div class="pl-f" data-f="wishes"><label for="plWishes">Anything you'd like to see in it? <span class="pl-opt">(optional)</span></label><textarea id="plWishes" name="wishes" rows="3"></textarea></div>
+        <div class="pl-f" data-f="wishes"><label for="plWishes">Anything you'd like but can't find? <span class="pl-opt">(optional)</span></label><textarea id="plWishes" name="wishes" rows="3"></textarea></div>
         <p class="pl-note">We only use your details to contact you about the pilot. <button type="button" class="pl-link" id="plPrivLink">Privacy</button></p>
       </form>
       <div class="pl-priv" id="plPriv" hidden>
@@ -577,10 +590,9 @@
   </div>
 </div>
 <div class="demo-bar" role="note">
-  <span class="pill">BETA DEMO</span>
-  <span class="msg"><b>Try everything.</b><span class="long"> Nothing is saved. A pilot for Belgian clubs starts in 2–3 weeks – limited spots.</span></span>
+  <span class="pill">PLAYBOOK DEMO</span>
+  <span class="msg"><b>Try everything.</b><span class="long"> Nothing is saved. Join the pilot to get access to the full version.</span></span>
   <span class="acts">
-    <button id="demoTry" type="button">Try editing</button>
     <button id="demoReset" type="button">Reset</button>
     <button id="pilotBtn" class="cta" type="button">Join the pilot →</button>
   </span>
@@ -1308,7 +1320,7 @@ function render(){
   app.classList.toggle('mode-edit', section==='signals' ? false : mode==='edit');
   layoutForMode();
   document.getElementById('dupPlayBtn').disabled=section!=='plays';
-  { const ed=section==='plays'&&mode==='edit'; const t=document.getElementById('demoTry'); if(t) t.textContent=ed?'Back to viewing':'Try editing'; }
+
   if(section==='signals'){ renderSignalsView(); return; }
 
   const play=curPlayObj();
@@ -1867,7 +1879,7 @@ document.querySelectorAll('#textOpts [data-align]').forEach(b=>b.onclick=()=>{ c
 document.getElementById('textOpts').addEventListener('mousedown',e=>{ if(e.target.closest('[data-tok]')) e.preventDefault(); });
 document.getElementById('textOpts').addEventListener('click',e=>{ const b=e.target.closest('[data-tok]'); if(b) insertToken(b.dataset.tok); });
 document.getElementById('demoReset').onclick=resetDemo;
-document.getElementById('demoTry').onclick=()=>{ const toEdit=!(section==='plays'&&mode==='edit'); section='plays'; mode=toEdit?'edit':'view'; clearSelection(); tool='move'; drawing=null; stopPlay(); render(); closeMobilePanels(); };
+if(document.getElementById('demoTry')) document.getElementById('demoTry').onclick=()=>{ const toEdit=!(section==='plays'&&mode==='edit'); section='plays'; mode=toEdit?'edit':'view'; clearSelection(); tool='move'; drawing=null; stopPlay(); render(); closeMobilePanels(); };
 
 document.getElementById('modalClose').onclick=()=>modal.classList.remove('on');
 modal.addEventListener('click',e=>{ if(e.target===modal) modal.classList.remove('on'); });
@@ -2296,11 +2308,35 @@ function inlInsert(tok){
   form.addEventListener('focusin',e=>{ if(e.target.matches('input,textarea')) setTimeout(()=>e.target.scrollIntoView({block:'center',behavior:'smooth'}),280); });
 })();
 
+/* Swipe feedback: the field slides in from the swipe side and a step label pops up */
+function swipeGo(dir){
+  const cur=()=>section==='plays' ? ((playing&&animTarget!=null)?animTarget:curStep) : null;
+  const before=cur();
+  if(dir>0) goNext(); else goPrev();
+  if(section!=='plays') return;
+  const after=cur(), n=curPlayObj().steps.length;
+  const fw=document.querySelector('.field-wrap'), sv=document.getElementById('svg');
+  let pill=document.getElementById('swPill'); if(!pill){ pill=document.createElement('div'); pill.id='swPill'; pill.className='sw-pill'; fw.appendChild(pill); }
+  sv.classList.remove('sw-in-l','sw-in-r','sw-bump-l','sw-bump-r'); void sv.offsetWidth;
+  if(after!==before){ sv.classList.add(dir>0?'sw-in-r':'sw-in-l'); pill.innerHTML='Step <b>'+(after+1)+'</b> / '+n; }
+  else { sv.classList.add(dir>0?'sw-bump-l':'sw-bump-r'); pill.innerHTML=dir>0?'Last step':'First step'; }
+  pill.classList.remove('on'); void pill.offsetWidth; pill.classList.add('on');
+  clearTimeout(swipeGo._t); swipeGo._t=setTimeout(()=>pill.classList.remove('on'),1100);
+}
+
+/* Editing only on laptop/desktop */
+(function(){
+  const small=window.matchMedia('(max-width:900px)');
+  const force=()=>{ if(small.matches && mode==='edit'){ mode='view'; clearSelection(); tool='move'; drawing=null; } };
+  const _r=render; render=function(){ force(); _r(); };
+  (small.addEventListener?small.addEventListener('change',()=>render()):small.addListener(()=>render()));
+})();
+
 /* Swipe between steps (view mode, touch) */
 (function(){ const st=document.querySelector('.stage'); let sx=null, sy=null, t0=0;
   st.addEventListener('touchstart',e=>{ if(e.touches.length!==1){ sx=null; return; } if(e.target.closest('.inspector')){ sx=null; return; } if(section==='plays'&&mode==='edit'){ sx=null; return; } sx=e.touches[0].clientX; sy=e.touches[0].clientY; t0=Date.now(); },{passive:true});
   st.addEventListener('touchend',e=>{ if(sx===null) return; const t=e.changedTouches[0]; const dx=t.clientX-sx, dy=t.clientY-sy; sx=null;
-    if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.4 && Date.now()-t0<800){ if(dx<0) goNext(); else goPrev(); } },{passive:true});
+    if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.4 && Date.now()-t0<800){ swipeGo(dx<0?1:-1); } },{passive:true});
 })();
 
 /* Toast */
