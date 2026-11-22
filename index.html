@@ -537,6 +537,11 @@
   @media (max-width:900px){ #modeSeg,#insMode,#toolsBtn,#newPlayBtn,#dupPlayBtn,#importBtn{display:none !important} .sidebar-foot .io-row{display:block} .sidebar-foot .io-row .btn{width:100%} }
   .pl-priv a{color:var(--accent); font-weight:600}
   .pl-welcome p b{color:var(--ink); font-weight:700}
+  .demo-bar .pill{background:transparent; color:#fff; border:1px solid #fff; border-radius:8px; padding:0 10px; height:29px; display:inline-flex; align-items:center; line-height:1}
+  .demo-bar button{height:29px; box-sizing:border-box}
+  .pl-contact{margin:18px 0 0; padding-top:14px; border-top:1px solid var(--line); font-size:14px; color:var(--muted); line-height:1.45}
+  .pl-contact a{color:var(--accent); font-weight:600}
+  .tchip{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -584,6 +589,7 @@
         <p class="pl-thanks">Thanks! We'll set up your club's version and send it to you within 2–3 weeks.</p>
         <button class="btn primary pl-big" id="plBack" type="button">Back to the demo</button>
         <button class="btn pl-big" id="plShare" type="button">Share the demo with your team</button>
+        <p class="pl-contact">Questions or ideas? Mail us at <a id="plMail" href="mailto:ruben@shorrt.be?subject=Playbook%20pilot">ruben@shorrt.be</a></p>
       </div>
     </div>
     <div class="pl-foot" id="plFoot">
@@ -844,7 +850,7 @@
 
 <script>
 /* Vul hier de link naar de enquête in; leeg = knop verborgen */
-window.PILOT_ENDPOINT = "";   // URL of the Google Apps Script web app (empty = test mode: logs to the console)
+window.PILOT_ENDPOINT = "https://script.google.com/macros/s/AKfycbw_HH8AIPSEBhJ8C35kl8jvNqGGjHG9CVSY3ENXxu7b3GiMwzpgyroppFdy6SoWSoDu7A/exec";   // URL of the Google Apps Script web app (empty = test mode: logs to the console)
 </script>
 <script>
 "use strict";
@@ -2294,7 +2300,7 @@ function inlInsert(tok){
     }catch(err){ console.warn('[pilot] send failed',err); $('plFail').hidden=false; $('plSend').querySelector('.pl-sendt').textContent='Try again'; }
     finally{ send.classList.remove('busy'); if($('plFail').hidden) $('plSend').querySelector('.pl-sendt').textContent='Send'; }
   });
-  function done(){ ss.set('pb_joined','1'); setJoinedUI(); view('done'); setTimeout(()=>{ try{ S.focus({preventScroll:true}); }catch(e){} },60); }
+  function done(){ try{ const c=val('plClub'); $('plMail').href='mailto:ruben@shorrt.be?subject='+encodeURIComponent('Playbook pilot'+(c?' – '+c:'')); }catch(e){} ss.set('pb_joined','1'); setJoinedUI(); view('done'); setTimeout(()=>{ try{ S.focus({preventScroll:true}); }catch(e){} },60); }
   $('plBack').onclick=closeForm;
   $('plShare').onclick=async()=>{ const url=location.origin+location.pathname; const data={title:'Playbook demo', text:'Have a look at this playbook demo for frisbee clubs:', url};
     if(navigator.share){ try{ await navigator.share(data); }catch(e){} return; }
