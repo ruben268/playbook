@@ -545,6 +545,18 @@
   .demo-bar #barShare{gap:6px}
   .demo-bar #barShare[hidden]{display:none}
   @media (max-width:480px){ .demo-bar #barShare span{display:none} .demo-bar #barShare{padding:0 9px} }
+  .sh-pop{position:fixed; z-index:75; width:min(340px, calc(100vw - 24px)); background:#fff; color:var(--ink); border-radius:14px; box-shadow:0 14px 40px rgba(20,30,45,.28); padding:14px}
+  .sh-pop[hidden]{display:none}
+  .sh-pop .sh-arrow{position:absolute; width:12px; height:12px; background:#fff; transform:rotate(45deg); border-radius:2px}
+  .sh-pop h4{margin:0 0 10px; font-size:14px; font-weight:600}
+  .sh-row{display:flex; gap:6px}
+  .sh-row input{flex:1; min-width:0; height:40px; border:1px solid var(--line); border-radius:9px; padding:0 10px; font-size:14px; color:var(--muted); background:#f6f7f9; font-family:inherit}
+  .sh-copy{height:40px; display:inline-flex; align-items:center; gap:6px; padding:0 12px; border-radius:9px; border:0; background:var(--accent); color:#fff; font-weight:600; font-size:13.5px; white-space:nowrap}
+  .sh-copy.ok{background:#1f8a4c}
+  .sh-opts{display:flex; gap:6px; margin-top:10px; padding-top:10px; border-top:1px solid #eef0f2}
+  .sh-opt{flex:1; height:42px; display:inline-flex; align-items:center; justify-content:center; gap:7px; border:1px solid var(--line); border-radius:9px; background:#fff; font-size:13.5px; font-weight:600; color:var(--ink); text-decoration:none; cursor:pointer}
+  .sh-opt:hover{border-color:#c9d0d7}
+  .sh-copy:focus-visible,.sh-opt:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
   #importBtn,#exportBtn,.sidebar-foot .io-row{display:none !important}
 </style>
 </head>
@@ -600,6 +612,14 @@
       <div class="pl-fail" id="plFail" hidden>Something went wrong while sending. Your answers are still here – please try again.</div>
       <button class="btn primary pl-big" id="plSend" type="submit" form="plFormEl"><span class="pl-spin" aria-hidden="true"></span><span class="pl-sendt">Send</span></button>
     </div>
+  </div>
+</div>
+<div class="sh-pop" id="shPop" role="dialog" aria-label="Share the demo" hidden>
+  <h4>Share the demo</h4>
+  <div class="sh-row"><input id="shUrl" readonly aria-label="Link to the demo"><button class="sh-copy" id="shCopy" type="button"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg><span>Copy link</span></button></div>
+  <div class="sh-opts">
+    <a class="sh-opt" id="shWa" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.4 7.4L3.5 20.5l1.6-4.4a8.4 8.4 0 1 1 15.4-4.5z"/><path d="M9 8.6c.2 2.9 2.5 5.4 5.6 5.9l1.1-1.3-1.8-.9-.8.8a4.6 4.6 0 0 1-2.4-2.4l.8-.8-.9-1.8z"/></svg>WhatsApp</a>
+    <a class="sh-opt" id="shMail"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>E-mail</a>
   </div>
 </div>
 <div class="demo-bar" role="note">
@@ -2238,7 +2258,33 @@ function inlInsert(tok){
   // ---- bar button
   const pb=$('pilotBtn');
   function setJoinedUI(){ if(joined()){ pb.textContent="You're in ✓"; pb.classList.add('done'); pb.disabled=true; pb.setAttribute('aria-disabled','true'); const bs=$('barShare'); if(bs) bs.hidden=false; } }
-  $('barShare').onclick=()=>$('plShare').click();
+  // share popover, anchored to the button that opened it
+  const SP=$('shPop'); let spFrom=null;
+  const shareUrl=()=>location.origin+location.pathname;
+  function openShare(btn){
+    const url=shareUrl(), msg='Have a look at this playbook demo for frisbee clubs: ';
+    $('shUrl').value=url.replace(/\/$/,'');
+    $('shWa').href='https://wa.me/?text='+encodeURIComponent(msg+url);
+    $('shMail').href='mailto:?subject='+encodeURIComponent('Playbook demo for frisbee clubs')+'&body='+encodeURIComponent(msg+url);
+    const c=$('shCopy'); c.classList.remove('ok'); c.querySelector('span').textContent='Copy link';
+    SP.hidden=false; spFrom=btn;
+    let ar=SP.querySelector('.sh-arrow'); if(!ar){ ar=document.createElement('span'); ar.className='sh-arrow'; SP.prepend(ar); }
+    const r=btn.getBoundingClientRect(), w=SP.offsetWidth, h=SP.offsetHeight;
+    const left=Math.max(12, Math.min(r.left+r.width/2-w/2, innerWidth-w-12));
+    const below=r.bottom+10+h<innerHeight-8; const top=below? r.bottom+10 : r.top-10-h;
+    SP.style.left=left+'px'; SP.style.top=Math.max(8,top)+'px';
+    ar.style.left=(r.left+r.width/2-left-6)+'px'; ar.style.top=below?'-6px':''; ar.style.bottom=below?'':'-6px';
+    setTimeout(()=>{ try{ c.focus({preventScroll:true}); }catch(e){} },30);
+  }
+  function closeShare(){ if(SP.hidden) return; SP.hidden=true; if(spFrom) try{ spFrom.focus({preventScroll:true}); }catch(e){} spFrom=null; }
+  $('shCopy').onclick=async()=>{ const c=$('shCopy'), url=shareUrl(); let ok=false;
+    try{ await navigator.clipboard.writeText(url); ok=true; }catch(e){ try{ const i=$('shUrl'); i.select(); ok=document.execCommand('copy'); }catch(_){} }
+    c.classList.toggle('ok',ok); c.querySelector('span').textContent=ok?'Copied':'Select & copy'; if(!ok) $('shUrl').select(); };
+  $('shUrl').onclick=e=>e.target.select();
+  document.addEventListener('pointerdown',e=>{ if(!SP.hidden && !SP.contains(e.target) && !(spFrom&&spFrom.contains(e.target))) closeShare(); },true);
+  SP.addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Escape'){ e.preventDefault(); closeShare(); } });
+  addEventListener('resize',closeShare);
+  $('barShare').onclick=e=>{ if(!SP.hidden&&spFrom===e.currentTarget) closeShare(); else openShare(e.currentTarget); };
   pb.onclick=()=>openForm(pb);
   setJoinedUI();
   // ---- welcome (once per session)
@@ -2309,9 +2355,7 @@ function inlInsert(tok){
   });
   function done(){ try{ const c=val('plClub'); $('plMail').href='mailto:ruben@shorrt.be?subject='+encodeURIComponent('Playbook pilot'+(c?' – '+c:'')); }catch(e){} ss.set('pb_joined','1'); setJoinedUI(); view('done'); setTimeout(()=>{ try{ S.focus({preventScroll:true}); }catch(e){} },60); }
   $('plBack').onclick=closeForm;
-  $('plShare').onclick=async()=>{ const url=location.origin+location.pathname; const data={title:'Playbook demo', text:'Have a look at this playbook demo for frisbee clubs:', url};
-    if(navigator.share){ try{ await navigator.share(data); }catch(e){} return; }
-    try{ await navigator.clipboard.writeText(url); toast('Copied'); }catch(e){ toast(url); } };
+  $('plShare').onclick=e=>openShare(e.currentTarget);
   // keyboard: keep focus inside, Escape closes, app shortcuts stay off
   function trap(e,root){ if(e.key!=='Tab') return; const f=[...root.querySelectorAll('button,input,textarea,[tabindex]:not([tabindex="-1"])')].filter(x=>!x.disabled&&x.offsetParent!==null&&x.id!=='plHp'); if(!f.length) return; const a=f[0], z=f[f.length-1];
     if(e.shiftKey&&(document.activeElement===a||document.activeElement===root)){ e.preventDefault(); z.focus(); } else if(!e.shiftKey&&document.activeElement===z){ e.preventDefault(); a.focus(); } }
