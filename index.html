@@ -545,6 +545,7 @@
   .demo-bar #barShare{gap:6px}
   .demo-bar #barShare[hidden]{display:none}
   @media (max-width:480px){ .demo-bar #barShare span{display:none} .demo-bar #barShare{padding:0 9px} }
+  #importBtn,#exportBtn,.sidebar-foot .io-row{display:none !important}
 </style>
 </head>
 <body>
@@ -2205,8 +2206,8 @@ function inlInsert(tok){
 (function(){
   const $=id=>document.getElementById(id);
   const show=imp=>{ $('ioFile').style.display=imp?'flex':'none'; $('modalText').style.display=imp?'block':'none'; };
-  $('exportBtn').onclick=()=>{ openExport(); show(false); closeMobilePanels(); };
-  $('importBtn').onclick=()=>{ openImport(); show(true); $('ioFile').querySelector('.hint').textContent='or paste the JSON below'; closeMobilePanels(); };
+  $('exportBtn').onclick=()=>{ return; openExport(); show(false); closeMobilePanels(); };
+  $('importBtn').onclick=()=>{ return; openImport(); show(true); $('ioFile').querySelector('.hint').textContent='or paste the JSON below'; closeMobilePanels(); };
   // 'Replace all' uses the ticked plays only
   const ld=$('modalLoad'), _l=ld.onclick; ld.onclick=()=>{ if(importData){ const chosen=importData.filter((p,i)=>importSel[i]); if(!chosen.length){ toast('Nothing selected'); return; } snapshot(); plays=chosen; curPlay=0; curStep=0; section='plays'; clearSelection(); stopPlay(); render(); modal.classList.remove('on'); toast(chosen.length+' plays loaded'); return; } _l(); };
   ld.title='Remove all current plays and keep only the ticked ones';
