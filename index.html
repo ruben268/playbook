@@ -1808,9 +1808,10 @@ function finishMarquee(){
   setSelection(out); render();
 }
 function newPlay(){ snapshot(); const p={id:uid(),name:"New play",category:"offense",endzone:"bottom",description:"",
-  steps:[{note:"",disc:{x:.40,y:.80},
-    offense:[P("o1","1",.40,.80),P("o2","2",.60,.82),P("o3","3",.50,.42),P("o4","4",.50,.50),P("o5","5",.50,.58),P("o6","6",.50,.66),P("o7","7",.50,.34)],
-    defense:[P("d1","1",.44,.85),P("d2","2",.56,.87),P("d3","3",.54,.42),P("d4","4",.54,.50),P("d5","5",.54,.58),P("d6","6",.54,.66),P("d7","7",.50,.28)]}]};
+  steps:[{note:"",disc:{x:.5694,y:.7956},
+    offense:[P("o1","1",.5266,.8045),P("o2","2",.1736,.8219),P("o3","3",.4903,.5765),P("o4","4",.4903,.5111),P("o5","5",.4903,.4457),P("o6","6",.4903,.3803),P("o7","7",.4903,.3149)],
+    defense:[P("d1","1",.4675,.7728),P("d2","2",.2134,.7846),P("d3","3",.5759,.6045),P("d4","4",.5759,.5260),P("d5","5",.5759,.4475),P("d6","6",.5759,.3690),P("d7","7",.5759,.2905)],
+    labels:[], lines:[]}]};
   plays.push(p); curPlay=plays.length-1; curStep=0; mode='edit'; clearSelection(); stopPlay(); render(); document.getElementById('titleInput').focus(); }
 function deletePlay(){ if(plays.length<=1){toast('Your playbook needs at least one play.');return;} snapshot(); plays.splice(curPlay,1); curPlay=Math.max(0,curPlay-1); curStep=0; render(); }
 
