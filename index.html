@@ -1,4 +1,10 @@
 <!doctype html>
+<!--
+  Playbook demo – © 2026 Shorrt – Ruben Persoons, Ghent, Belgium.
+  All rights reserved. Unauthorized copying, modification or
+  redistribution of this code, in whole or in part, is prohibited.
+  Contact: ruben@shorrt.be
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -548,6 +554,7 @@
   @keyframes swBumpR{30%{transform:translateX(12px)} 100%{transform:none}}
   @media (max-width:900px){ #modeSeg,#insMode,#toolsBtn,#newPlayBtn,#dupPlayBtn,#importBtn{display:none !important} .sidebar-foot .io-row{display:block} .sidebar-foot .io-row .btn{width:100%} }
   .pl-priv a{color:var(--accent); font-weight:600}
+  .tm-body ul{font-size:14px; line-height:1.5; color:#3b4652; padding-left:20px; margin:0 0 12px}
   .pl-welcome p b{color:var(--ink); font-weight:700}
   .demo-bar .pill{background:transparent; color:#fff; border:1px solid #fff; border-radius:8px; padding:0 10px; height:29px; display:inline-flex; align-items:center; line-height:1}
   .demo-bar button{height:29px; box-sizing:border-box}
@@ -624,6 +631,26 @@
     <div class="pl-foot" id="plFoot">
       <div class="pl-fail" id="plFail" hidden>Something went wrong while sending. Your answers are still here – please try again.</div>
       <button class="btn primary pl-big" id="plSend" type="submit" form="plFormEl"><span class="pl-spin" aria-hidden="true"></span><span class="pl-sendt">Send</span></button>
+    </div>
+  </div>
+</div>
+<div class="pl-bg pl-sheet-bg" id="tmForm" role="dialog" aria-modal="true" aria-labelledby="tmTitle">
+  <div class="pl-sheet" id="tmSheet" tabindex="-1">
+    <div class="pl-head"><h2 id="tmTitle">Terms &amp; copyright</h2><button class="pl-x" type="button" id="tmClose" aria-label="Close">×</button></div>
+    <div class="pl-scroll">
+      <div class="pl-priv tm-body">
+        <p><b>© 2026 Shorrt – Ruben Persoons, Ghent, Belgium. All rights reserved.</b></p>
+        <p>This demo, including its code, design, animations and example plays, is protected by copyright. It is made available only so you can view and try it out.</p>
+        <p>Without our written permission, you may not:</p>
+        <ul>
+          <li>copy, download or reuse the code or design, in whole or in part</li>
+          <li>modify it or build your own version based on it</li>
+          <li>publish, share or host it elsewhere, or use it commercially</li>
+        </ul>
+        <p>Sharing the link to this demo is, of course, welcome.</p>
+        <p>Interested in using the Playbook for your club? Join the pilot or contact us at <a href="mailto:ruben@shorrt.be?subject=Playbook">ruben@shorrt.be</a>.</p>
+        <button type="button" class="btn" id="tmBack">Close</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1498,6 +1525,10 @@ function renderSidebar(){
   const rl=document.createElement('a'); rl.className='play-item link-item'; rl.href='https://rules.wfdf.sport/wp-content/uploads/2024/12/WFDF-Rules-of-Ultimate-2025-2028.pdf'; rl.target='_blank'; rl.rel='noopener';
   rl.innerHTML='<div class="nm">Rules of Ultimate (PDF) <span class="ext">\u2197</span></div><div class="meta">WFDF Rules of Ultimate 2025\u20132028</div>';
   list.appendChild(rl);
+  const tl=document.createElement('a'); tl.className='play-item link-item'; tl.href='#terms';
+  tl.innerHTML='<div class="nm">Terms &amp; copyright</div><div class="meta">\u00a9 2026 Shorrt \u2013 Ruben Persoons</div>';
+  tl.onclick=e=>{ e.preventDefault(); if(window.openTerms) window.openTerms(tl); };
+  list.appendChild(tl);
 }
 function renderSignalsView(){
   const sig=signals[sigIdx];
@@ -2405,6 +2436,17 @@ function swipeGo(dir){
   (small.addEventListener?small.addEventListener('change',()=>render()):small.addListener(()=>render()));
 })();
 
+/* Terms & copyright modal */
+(function(){
+  const T=document.getElementById('tmForm'), S=document.getElementById('tmSheet'); if(!T) return;
+  let from=null;
+  function close(){ T.classList.remove('on'); if(from) try{ from.focus({preventScroll:true}); }catch(e){} }
+  window.openTerms=function(el){ from=el||null; try{ stopPlay(); }catch(e){} try{ closeMobilePanels(); }catch(e){} T.classList.add('on'); setTimeout(()=>{ try{ S.focus({preventScroll:true}); }catch(e){} },60); };
+  document.getElementById('tmClose').onclick=close;
+  document.getElementById('tmBack').onclick=close;
+  T.addEventListener('click',e=>{ if(e.target===T) close(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&T.classList.contains('on')) close(); });
+})();
 /* Swipe between steps (view mode, touch) */
 (function(){ const st=document.querySelector('.stage'); let sx=null, sy=null, t0=0;
   st.addEventListener('touchstart',e=>{ if(e.touches.length!==1){ sx=null; return; } if(e.target.closest('.inspector')){ sx=null; return; } if(section==='plays'&&mode==='edit'){ sx=null; return; } sx=e.touches[0].clientX; sy=e.touches[0].clientY; t0=Date.now(); },{passive:true});
